@@ -15,7 +15,9 @@
 
 
 WITH CTE AS (
-SELECT QUARTER(DATE(LEFT(transaction_date,'10'),'dd/MM/yyyy')) AS quarter, REPLACE(REPLACE(online_or_in_person,'1','Online'),'2','In-Person') AS online_in_person, SUM(value) as total_value,
+SELECT 
+QUARTER(DATE(LEFT(transaction_date,'10'),'dd/MM/yyyy')) AS quarter, REPLACE(REPLACE(online_or_in_person,'1','Online'),'2','In-Person') AS online_in_person,
+SUM(value) as total_value,
 
 FROM TIL_PLAYGROUND.PREPPIN_DATA_INPUTS.PD2023_WK01
 WHERE TRANSACTION_CODE LIKE 'DSB%'
@@ -25,10 +27,12 @@ GROUP BY 1,2
 
 SELECT
 online_or_in_person,
-REPLACE(T.quarter,'Q','')::int as quarter,
-V.total_value,
+REPLACE(T.quarter, 'Q', '')::int as quarter, 
 target,
-V.total_value - target as variance_from_target
+V.total_value,
+V.total_value - target AS variance_from_target
 FROM TIL_PLAYGROUND.PREPPIN_DATA_INPUTS.PD2023_WK03_TARGETS as T
 UNPIVOT(target FOR quarter IN (Q1,Q2,Q3,Q4))
-INNER JOIN CTE AS V ON T.ONLINE_OR_IN_PERSON = V.online_in_person AND REPLACE(T.quarter,'Q','')::int = V.quarter
+
+INNER JOIN CTE AS V
+ON T.ONLINE_OR_IN_PERSON = V.ONLINE_IN_PERSON AND REPLACE(T.quarter, 'Q', '')::int = V.quarter
